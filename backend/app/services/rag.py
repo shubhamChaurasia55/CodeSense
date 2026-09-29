@@ -1,17 +1,18 @@
 from app.services.embeddings import EmbeddingService
 from app.services.vector_store import VectorStore
 from app.services.parser import parse_python_code
+from app.services.prompt_builder import build_rag_prompt
+from app.services.providers.groq import GroqService
 
 
 class RAGEngine:
-
     def __init__(self):
         self.embedding_service = EmbeddingService()
         self.vector_store = None
         self.indexed = False
+        self.llm = GroqService()
 
     def index_code(self, code: str):
-
         chunks = parse_python_code(code)
 
         if not chunks:
@@ -20,14 +21,9 @@ class RAGEngine:
                 "message": "No code chunks found"
             }
 
-        texts = [
-            chunk["code"]
-            for chunk in chunks
-        ]
+        texts = [chunk["code"] for chunk in chunks]
 
-        embeddings = self.embedding_service.generate_embeddings(
-            texts
-        )
+        embeddings = self.embedding_service.generate_embeddings(texts)
 
         dimension = len(embeddings[0])
 
@@ -46,19 +42,55 @@ class RAGEngine:
         }
 
     def search(self, query: str, top_k: int = 3):
-
         if not self.indexed:
-            raise ValueError(
-                "No code has been indexed yet"
-            )
+            raise ValueError("No code has been indexed yet")
 
-        query_embedding = (
-            self.embedding_service.generate_embedding(query)
-        )
+        query_embedding = self.embedding_service.generate_embedding(query)
 
-        results = self.vector_store.search(
+        return self.vector_store.search(
             query_embedding,
-            top_k=top_k
+            top_k
         )
 
-        return results
+    def build_prompt(self, question: str, top_k: int = 3):
+        results = self.search(question, top_k)
+
+        prompt = build_rag_prompt(
+            question,
+            results
+        )
+
+        return {
+            "question": question,
+            "results": results,
+            "prompt": prompt
+        }
+
+    def ask(self, question: str, top_k: int = 3):
+        results = self.search(question, top_k)
+
+        prompt = build_rag_prompt(
+            question,
+            results
+        )
+
+        answer = self.llm.generate(prompt)
+
+        sources = []
+
+        for result in results:
+            document = result["document"]
+
+            sources.append({
+                "name": document.get("name"),
+                "type": document.get("type"),
+                "start_line": document.get("start_line"),
+                "end_line": document.get("end_line"),
+                "score": result["score"]
+            })
+
+        return {
+            "question": question,
+            "answer": answer,
+            "sources": sources
+        }

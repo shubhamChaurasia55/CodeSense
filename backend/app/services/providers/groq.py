@@ -1,0 +1,44 @@
+import os
+
+from dotenv import load_dotenv
+from groq import Groq
+
+from app.services.llm_service import LLMService
+
+
+load_dotenv()
+
+
+class GroqService(LLMService):
+
+    def __init__(self):
+        api_key = os.getenv("GROQ_API_KEY")
+
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is not set")
+
+        self.client = Groq(api_key=api_key)
+
+        self.model = "openai/gpt-oss-20b"
+
+    def generate(self, prompt: str) -> str:
+
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are CodeSense, an AI code "
+                        "intelligence and debugging assistant."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            reasoning_effort="low"
+        )
+
+        return response.choices[0].message.content
