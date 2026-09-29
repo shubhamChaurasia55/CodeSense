@@ -1,4 +1,4 @@
-from services.embeddings import EmbeddingService
+from app.services.embeddings import EmbeddingService
 
 
 service = EmbeddingService()

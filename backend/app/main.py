@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 
 from app.routes.upload import router as upload_router
+from app.routes.indexing import router as indexing_router
+from app.routes.query import router as query_router
 
 
 app = FastAPI(
@@ -11,6 +13,8 @@ app = FastAPI(
 
 
 app.include_router(upload_router)
+app.include_router(indexing_router)
+app.include_router(query_router)
 
 
 @app.get("/")
