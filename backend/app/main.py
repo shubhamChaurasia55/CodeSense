@@ -5,6 +5,8 @@ from app.routes.indexing import router as indexing_router
 from app.routes.query import router as query_router
 from app.routes.ask import router as ask_router
 from app.routes.debug import router as debug_router
+from app.routes.analyze import router as analyze_router
+from app.routes.review import router as review_router
 
 
 app = FastAPI(
@@ -18,6 +20,8 @@ app.include_router(indexing_router)
 app.include_router(query_router)
 app.include_router(ask_router)
 app.include_router(debug_router)
+app.include_router(analyze_router)
+app.include_router(review_router)
 
 
 @app.get("/")

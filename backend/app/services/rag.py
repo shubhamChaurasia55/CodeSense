@@ -4,6 +4,7 @@ from app.services.parser import parse_python_code
 from app.services.prompt_builder import build_rag_prompt
 from app.services.providers.groq import GroqService
 from app.services.debug_prompt import build_debug_prompt
+from app.services.review_prompt import build_review_prompt
 
 
 class RAGEngine:
@@ -133,4 +134,21 @@ class RAGEngine:
             "question": question,
             "answer": answer.model_dump(),
             "sources": sources
+        }
+
+    def review(self, code: str):
+        from app.services.code_analyzer import analyze_python_code
+
+        analysis = analyze_python_code(code)
+
+        prompt = build_review_prompt(
+            code,
+            analysis
+        )
+
+        result = self.llm.review(prompt)
+
+        return {
+            "analysis": analysis,
+            "review": result.model_dump()
         }

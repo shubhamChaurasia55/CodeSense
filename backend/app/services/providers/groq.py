@@ -5,6 +5,7 @@ from groq import Groq
 
 from app.services.llm_service import LLMService
 from app.schemas.debug import DebugAIResponse
+from app.schemas.review import CodeReviewResponse
 
 
 load_dotenv()
@@ -98,3 +99,80 @@ class GroqService(LLMService):
         content = response.choices[0].message.content
 
         return DebugAIResponse.model_validate_json(content)
+
+
+    def review(self, prompt: str) -> CodeReviewResponse:
+        response = self.client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are CodeSense, an AI code review assistant."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "code_review",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "string"
+                            },
+                            "issues": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "severity": {
+                                            "type": "string"
+                                        },
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "explanation": {
+                                            "type": "string"
+                                        },
+                                        "suggestion": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "severity",
+                                        "title",
+                                        "explanation",
+                                        "suggestion"
+                                    ],
+                                    "additionalProperties": False
+                                }
+                            },
+                            "overall_suggestions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "required": [
+                            "summary",
+                            "issues",
+                            "overall_suggestions"
+                        ],
+                        "additionalProperties": False
+                    }
+                }
+            },
+            reasoning_effort="low"
+        )
+
+        content = response.choices[0].message.content
+
+        return CodeReviewResponse.model_validate_json(content)
