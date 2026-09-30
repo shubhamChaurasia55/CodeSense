@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+  background: white;
+}
+
+/* AI Markdown */
+
+.ai-markdown p {
+  margin: 0 0 0.75rem;
+}
+
+.ai-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.ai-markdown ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  list-style-type: disc;
+}
+
+.ai-markdown ol {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  list-style-type: decimal;
+}
+
+.ai-markdown li {
+  margin: 0.25rem 0;
+}
+
+.ai-markdown code {
+  background: #e5e7eb;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+}
+
+.ai-markdown pre {
+  background: #111827;
+  color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+}
+
+.ai-markdown pre code {
+  background: transparent;
+  padding: 0;
+}

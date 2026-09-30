@@ -36,7 +36,10 @@ async def index_code(file: UploadFile = File(...)):
 
     try:
 
-        result = rag_engine.index_code(code)
+        result = rag_engine.index_code(
+            code,
+            file.filename
+        )
 
         return {
             "filename": file.filename,
